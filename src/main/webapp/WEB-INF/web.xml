@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+	id="WebApp_ID" version="3.1">
+	
+	<display-name>myforum</display-name>
+	
+	<!-- 指定Spring配置文件，配置Spring容器的监听器 -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:/spring/applicationContext-*.xml</param-value>
+	</context-param>
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+	
+	
+	<!-- 配置SpringMVC前端控制器 -->
+	<servlet>
+		<servlet-name>springmvc</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<!-- contextConfigLocation配置springmvc加载的配置文件（配置处理器映射器、适配器等）
+			 若不配置默认加载的是/WEB-INF/servlet名称-servlet.xml(springmvc-servlet.xml) -->
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>classpath:springmvc.xml</param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>springmvc</servlet-name>
+		<!-- 斜杠/，所有访问的地址，都由DispatcherServlet进行解析， -->
+		<!-- 对于静态文件的解析需要配置不让DispatcherServlet进行解析； -->
+		<url-pattern>*.html</url-pattern>
+	</servlet-mapping>
+	
+	
+	<!-- 在Spring中使用Hibernate的延迟加载问题：使用OpenSessionInViewFilter过滤器，在web层打开Hibernate session，
+	     使每个请求过程绑定一个HibernateSession，即使最初的事务已经完成，也能在web层进行延迟加载操作； -->
+	<filter>
+		<filter-name>hibernateFilter</filter-name>
+		<filter-class>org.springframework.orm.hibernate5.support.OpenSessionInViewFilter</filter-class>
+		<init-param>
+			<param-name>sessionFactoryBeanName</param-name>
+			<param-value>sessionFactory</param-value>
+		</init-param>
+	</filter>
+ 	<filter-mapping>
+ 		<filter-name>hibernateFilter</filter-name>
+ 		<url-pattern>*.html</url-pattern>
+ 	</filter-mapping>
+ 	<filter-mapping>
+ 		<filter-name>hibernateFilter</filter-name>
+ 		<url-pattern>*.jsp</url-pattern>
+ 	</filter-mapping>
+	
+	
+	<!-- 论坛登录验证过滤器 -->
+	<filter>
+		<filter-name>forumFilter</filter-name>
+		<filter-class>com.zxj.web.ForumFIlter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>forumFilter</filter-name>
+		<url-pattern>*.html</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>forumFilter</filter-name>
+		<url-pattern>*.jsp</url-pattern>
+	</filter-mapping>
+	
+	<!-- 使用Spring的编码转换过滤器，将请求信息的编码统一转换为UTF-8，以避免中文乱码问题； -->
+	<filter>
+		<filter-name>characterEncodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>characterEncodingFilter</filter-name>
+		<url-pattern>*.html</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>characterEncodingFilter</filter-name>
+		<url-pattern>*.jsp</url-pattern>
+	</filter-mapping>
+	
+	<filter>
+        <filter-name>MultipartFilter</filter-name>
+        <filter-class>org.springframework.web.multipart.support.MultipartFilter</filter-class>
+        <init-param>
+            <param-name>multipartResolverBeanName</param-name>
+            <param-value>multipartResolver</param-value>
+        </init-param>
+	</filter> 
+	<!--
+		浏览器不支持put,delete等method,由该HiddenHttpMethodFilter将xxx?_method=delete 或 xxx?_method=put 转换为标准的
+		http delete、put 方法
+	-->
+	<filter>
+		<filter-name>HiddenHttpMethodFilter</filter-name>
+		<filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>HiddenHttpMethodFilter</filter-name>
+		<servlet-name>springmvc</servlet-name>
+	</filter-mapping> 
+	
+	<filter>
+		<filter-name>myFilter</filter-name>
+		<filter-class>com.zxj.web.MyHttpMethodFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>myFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>FORWARD</dispatcher>
+		<!-- <dispatcher>REQUEST</dispatcher>  -->
+	</filter-mapping>
+	
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+		<welcome-file>index.htm</welcome-file>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+</web-app>

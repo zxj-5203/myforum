@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans  xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:tx="http://www.springframework.org/schema/tx"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:p="http://www.springframework.org/schema/p"
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans 
+							http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	   		 				http://www.springframework.org/schema/context 
+	   		 				http://www.springframework.org/schema/context/spring-context-4.0.xsd
+	    					http://www.springframework.org/schema/tx 
+	    					http://www.springframework.org/schema/tx/spring-tx-4.0.xsd 
+	    					http://www.springframework.org/schema/aop 
+	    					http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<!-- 批量扫描com.zxj.dao包下所有标注@repository注解的类 -->
+	<context:component-scan base-package="com.zxj.dao"></context:component-scan>
+
+	<!-- 加载配置文件：定义JDBC连接的属性 -->
+	<context:property-placeholder location="classpath:db.properties" />
+
+	<!-- 加载数据源：使用dbcp，class属性的值在dbcpjar包的org.apache.commons.dbcp2包中 -->
+	<!-- destroy-method="close"当数据库连接不使用的时候,就把该连接重新放到数据池中,方便下次使用调用 -->
+	<!-- <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driver}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+	</bean> -->
+	
+	<!-- (1)配置c3p0数据库连接池 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<!-- 注入属性值 -->
+		<property name="driverClass" value="${jdbc.driver}"></property>
+		<property name="jdbcUrl" value="${jdbc.url}"></property>
+		<property name="user" value="${jdbc.username}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+	</bean> 
+
+	<!-- 定义Hibernate 的 sessionFactory -->
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<!-- 加载数据源：数据库连接池 -->
+		<property name="dataSource" ref="dataSource"></property>
+		<!-- 指定Hibernate注解包的扫描路径：扫描基于JPA注解的PO类目录 -->
+		<!-- Specify packages to search for autodetection of your entity classes 
+			 in the classpath. This is analogous to Spring's component-scan feature -->
+		<property name="packagesToScan">
+			<list>
+				<value>com.zxj.domain</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<!-- 基本配置：配置数据库信息 （可配置项设置参考 ..\project\etc 文件） -->
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+				<!-- 其他配置：在控制台显示生成的SQL语句，并格式化，默认false；部署时设为false -->
+				<prop key="show_sql">true</prop>
+				<prop key="format_sql">true</prop>
+				<!-- 开启二级缓存，在	基于JPA注解的实体对象中定义缓存策略； -->
+				<prop key="hibernate.cache.use_second_level_cache">true</prop>
+				<!-- 设置二级缓存插件EHCache的Provider类(hibernate5已过期) -->
+				<!-- <property name="cache.provider_class">org.hibernate.cache.EhCacheProvider</property> -->
+				<!-- 指定缓存实现类； -->
+				<prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.internal.EhcacheRegionFactory</prop>
+				<!-- 不启动"查询缓存"；如果想缓存使用findall()、list()、Iterator()、createCriteria()、 createQuery()等方法获得的数据结果集,必须配置此项 -->
+				<prop key="hibernate.cache.use_query_cache">false</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>	
+				<prop key="hibernate.connection.autocommit">true</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- hibernateTemplate是Spring提供的 简化hibernate API调用的模板类 -->
+	<bean id="hibernateTemplate" class="org.springframework.orm.hibernate5.HibernateTemplate">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+		<!-- <property name="checkWriteOperations" value="false"/> -->
+	</bean>
+
+</beans>
+
+
+
+
+
