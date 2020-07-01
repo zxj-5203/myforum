@@ -12,7 +12,7 @@
 		<spring.version>5.1.6.RELEASE</spring.version>
 		<commons-dbcp.version>1.4</commons-dbcp.version>
 		<servlet.version>3.0-alpha-1</servlet.version>
-		<mysql.version>5.1.47</mysql.version>
+		<mysql.version>8.0.16</mysql.version>
 		<slf4j.version>1.7.25</slf4j.version>
 		<aspectj.version>1.9.2</aspectj.version>
 		<selenium.version>3.141.59</selenium.version>
